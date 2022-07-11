@@ -17,13 +17,15 @@ exports.handler = async function (context, event, callback) {
   try {
     console.log('complete task fired');
     // parse data form the incoming http request
-    const { taskSid, reservationSid, conversationSid } = event;
+    const { taskSid, reservationSid, conversationSid, agentId } = event;
 
     // extract current agent participantSid
     const agentSid = await client.conversations
       .conversations(conversationSid)
-      .participants.list({ limit: 20 })
-      .then((participants) => participants[0].sid);
+      .participants.list({ limit: 1000 })
+      .then((participants) => {
+        return participants.find((participant) => participant.identity === agentId).sid;
+      });
 
     // remove current agent from conversation
     await client.conversations

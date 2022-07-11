@@ -68,3 +68,6 @@ appConfig.js
 build/
 .idea
 .twilio-functions
+
+#other
+.DS_Store

@@ -17,7 +17,7 @@ exports.handler = async function (context, event, callback) {
   try {
     // parse data form the incoming http request
     const originalTaskSid = event.taskSid;
-    const { targetSid, workerName } = event;
+    const { targetSid, conversationSid, agentId } = event;
 
     // retrieve attributes of the original task
     const originalTask = await client.taskrouter
@@ -43,7 +43,7 @@ exports.handler = async function (context, event, callback) {
      * this handles the case where the agent transfers task to a queue
      * that he is a part of. He won't get the task reassigned to him
      */
-    newAttributes.ignoreAgent = workerName;
+    newAttributes.ignoreAgent = agentId;
 
     /*
      * update task attributes to include the required targetSid on the task
@@ -92,6 +92,21 @@ exports.handler = async function (context, event, callback) {
       .tasks(originalTaskSid)
       .update({ assignmentStatus: 'completed', reason: 'task transferred' })
       .then((task) => console.log('task closed: ', task.assignmentStatus, task.reason));
+
+    // extract current agent participantSid
+    const agentSid = await client.conversations
+      .conversations(conversationSid)
+      .participants.list({ limit: 1000 })
+      .then((participants) => {
+        return participants.find((participant) => participant.identity === agentId).sid;
+      });
+
+    // remove current agent from conversation
+    await client.conversations
+      .conversations(conversationSid)
+      .participants(agentSid)
+      .remove()
+      .then(() => console.log(`Agent left conversation`));
 
     response.setBody({
       taskSid: newTask.sid,

@@ -12,11 +12,12 @@ export const setUpActions = () => {
       const body = {
         taskSid: payload.task.taskSid,
         targetSid: payload.targetSid,
-        workerName: Flex.Manager.getInstance().user.identity,
+        conversationSid: payload.task.attributes.conversationSid,
+        agentId: Flex.Manager.getInstance().user.identity,
       };
 
       // initiate the transfer
-      return fetch(`${process.env.REactions.ACT_APP_SERVERLESS_FUNCTION_DOMAIN}/conversation-transfer`, {
+      return fetch(`${process.env.REACT_APP_SERVERLESS_FUNCTION_DOMAIN}/conversation-transfer`, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -51,6 +52,8 @@ export const setUpActions = () => {
         agentId: Flex.Manager.getInstance().user.identity,
       };
 
+      console.log('conversationSid', body.conversationSid);
+
       // initiate accept tranfer
       return fetch(`${process.env.REACT_APP_SERVERLESS_FUNCTION_DOMAIN}/accept-task`, {
         headers: {
@@ -75,6 +78,7 @@ export const setUpActions = () => {
         taskSid: payload.task.taskSid,
         reservationSid: payload.sid,
         conversationSid: payload.task.attributes.conversationSid,
+        agentId: Flex.Manager.getInstance().user.identity,
       };
 
       // initiate complete tranfer
